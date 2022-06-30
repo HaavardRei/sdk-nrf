@@ -61,14 +61,18 @@ static struct bt_mesh_health_srv health_srv = {
 
 BT_MESH_HEALTH_PUB_DEFINE(health_pub, 0);
 
-static struct bt_mesh_scheduler_cli scheduler_cli; // TODO initialize?
+static struct bt_mesh_scheduler_cli scheduler_cli;
+static struct bt_mesh_time_cli time_cli = BT_MESH_TIME_CLI_INIT(NULL);
+static struct bt_mesh_scene_cli scene_cli;
 
 static struct bt_mesh_elem elements[] = {
 	BT_MESH_ELEM(1,
 		BT_MESH_MODEL_LIST(
 			BT_MESH_MODEL_CFG_SRV,
 			BT_MESH_MODEL_HEALTH_SRV(&health_srv, &health_pub),
-			BT_MESH_MODEL_SCHEDULER_CLI(&scheduler_cli)),
+			BT_MESH_MODEL_SCHEDULER_CLI(&scheduler_cli),
+			BT_MESH_MODEL_TIME_CLI(&time_cli),
+			BT_MESH_MODEL_SCENE_CLI(&scene_cli)),
 		BT_MESH_MODEL_NONE),
 };
 
@@ -80,7 +84,6 @@ static const struct bt_mesh_comp comp = {
 
 const struct bt_mesh_comp *model_handler_init(void)
 {
-	// TODO configure init
 	k_work_init_delayable(&attention_blink_work, attention_blink);
 	return &comp;
 }
