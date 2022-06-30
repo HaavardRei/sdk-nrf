@@ -14,11 +14,19 @@
 
 struct lightness_ctx {
 	struct bt_mesh_lightness_srv lightness_srv;
+	// struct bt_mesh_time_srv time_srv;
 	struct k_work_delayable per_work;
 	uint16_t target_lvl;
 	uint16_t current_lvl;
 	uint32_t time_per;
 	uint32_t rem_time;
+};
+
+struct scheduler_ctx {
+	struct bt_mesh_time_srv time_srv;
+	struct bt_mesh_scheduler_srv scheduler_srv;
+
+
 };
 
 /* Set up a repeating delayed work to blink the DK's LEDs when attention is
@@ -162,15 +170,30 @@ static struct lightness_ctx my_ctx = {
 static struct bt_mesh_light_ctrl_srv light_ctrl_srv =
 	BT_MESH_LIGHT_CTRL_SRV_INIT(&my_ctx.lightness_srv);
 
+static struct bt_mesh_ponoff_srv ponoff_srv =
+	BT_MESH_PONOFF_SRV_INIT(, NULL, NULL);
+
+static struct scheduler_ctx sched_ctx = {
+	.time_srv = 		BT_MESH_TIME_SRV_INIT(NULL), // TODO verify parameters
+	.scheduler_srv = 	BT_MESH_SCHEDULER_SRV_INIT(0xF, &sched_ctx.time_srv), // TODO verify parameters
+};
+
+	
+
 static struct bt_mesh_elem elements[] = {
 	BT_MESH_ELEM(1,
 		     BT_MESH_MODEL_LIST(
 			     BT_MESH_MODEL_CFG_SRV,
 			     BT_MESH_MODEL_HEALTH_SRV(&health_srv, &health_pub),
-			     BT_MESH_MODEL_LIGHTNESS_SRV(
-					 &my_ctx.lightness_srv)),
+				 BT_MESH_MODEL_PONOFF_SRV(&ponoff_srv),
+			     BT_MESH_MODEL_TIME_SRV(&sched_ctx.time_srv),
+			 	 BT_MESH_MODEL_SCHEDULER_SRV(&sched_ctx.scheduler_srv)),
 		     BT_MESH_MODEL_NONE),
 	BT_MESH_ELEM(2,
+		     BT_MESH_MODEL_LIST(
+			     BT_MESH_MODEL_LIGHTNESS_SRV(&my_ctx.lightness_srv)),
+		     BT_MESH_MODEL_NONE),
+	BT_MESH_ELEM(3,
 		     BT_MESH_MODEL_LIST(
 			     BT_MESH_MODEL_LIGHT_CTRL_SRV(&light_ctrl_srv)),
 		     BT_MESH_MODEL_NONE),
