@@ -55,7 +55,7 @@ static void status_handler(struct bt_mesh_onoff_cli *cli,
 
 	button->status = status->present_on_off;
 	dk_set_led(index, status->present_on_off);
-
+	printk("Source address: %u, Recieved TTL value: %u\n", ctx->addr, ctx->recv_ttl);
 	printk("Button %d: Received response: %s\n", index + 1,
 	       status->present_on_off ? "on" : "off");
 }
