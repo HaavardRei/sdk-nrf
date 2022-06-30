@@ -14,7 +14,6 @@
 
 struct lightness_ctx {
 	struct bt_mesh_lightness_srv lightness_srv;
-	// struct bt_mesh_time_srv time_srv;
 	struct k_work_delayable per_work;
 	uint16_t target_lvl;
 	uint16_t current_lvl;
@@ -25,8 +24,31 @@ struct lightness_ctx {
 struct scheduler_ctx {
 	struct bt_mesh_time_srv time_srv;
 	struct bt_mesh_scheduler_srv scheduler_srv;
+};
 
+// TODO Fix
 
+static void time_update_cb(struct bt_mesh_time_srv *srv, struct bt_mesh_msg_ctx *ctx,
+			   enum bt_mesh_time_update_types type)
+{
+	bt_mesh_time_srv_time_set(srv, k_uptime_get_32(), &srv->data.sync.status); // TODO fix status in cb
+	printk("Updated TAI seconds: %llu\n", srv->data.sync.status.tai.sec);
+}
+
+static struct scheduler_ctx sched_ctx = {
+	.time_srv = BT_MESH_TIME_SRV_INIT(&time_update_cb), // TODO verify parameters
+	.scheduler_srv =
+		BT_MESH_SCHEDULER_SRV_INIT(NULL, &sched_ctx.time_srv), // TODO verify parameters
+};
+
+// Used to initalize the time server
+static struct bt_mesh_time_status time_status = {
+	.tai.sec = 10000,
+	.tai.subsec = 0,
+	.uncertainty = 0,
+	.tai_utc_delta = 37,
+	.time_zone_offset = 0,
+	.is_authority = false,
 };
 
 /* Set up a repeating delayed work to blink the DK's LEDs when attention is
@@ -88,7 +110,7 @@ static void start_new_light_trans(const struct bt_mesh_lightness_set *set,
 				  struct lightness_ctx *ctx)
 {
 	uint32_t step_cnt = abs(set->lvl - ctx->current_lvl) / PWM_SIZE_STEP;
-	uint32_t time = set->transition ? set->transition->time : 0;
+	uint32_t time =	 set->transition ? set->transition->time : 0;
 	uint32_t delay = set->transition ? set->transition->delay : 0;
 
 	ctx->target_lvl = set->lvl;
@@ -170,30 +192,17 @@ static struct lightness_ctx my_ctx = {
 static struct bt_mesh_light_ctrl_srv light_ctrl_srv =
 	BT_MESH_LIGHT_CTRL_SRV_INIT(&my_ctx.lightness_srv);
 
-static struct bt_mesh_ponoff_srv ponoff_srv =
-	BT_MESH_PONOFF_SRV_INIT(, NULL, NULL);
-
-static struct scheduler_ctx sched_ctx = {
-	.time_srv = 		BT_MESH_TIME_SRV_INIT(NULL), // TODO verify parameters
-	.scheduler_srv = 	BT_MESH_SCHEDULER_SRV_INIT(0xF, &sched_ctx.time_srv), // TODO verify parameters
-};
-
-	
 
 static struct bt_mesh_elem elements[] = {
 	BT_MESH_ELEM(1,
 		     BT_MESH_MODEL_LIST(
 			     BT_MESH_MODEL_CFG_SRV,
 			     BT_MESH_MODEL_HEALTH_SRV(&health_srv, &health_pub),
-				 BT_MESH_MODEL_PONOFF_SRV(&ponoff_srv),
+				 BT_MESH_MODEL_LIGHTNESS_SRV(&my_ctx.lightness_srv),
 			     BT_MESH_MODEL_TIME_SRV(&sched_ctx.time_srv),
 			 	 BT_MESH_MODEL_SCHEDULER_SRV(&sched_ctx.scheduler_srv)),
 		     BT_MESH_MODEL_NONE),
 	BT_MESH_ELEM(2,
-		     BT_MESH_MODEL_LIST(
-			     BT_MESH_MODEL_LIGHTNESS_SRV(&my_ctx.lightness_srv)),
-		     BT_MESH_MODEL_NONE),
-	BT_MESH_ELEM(3,
 		     BT_MESH_MODEL_LIST(
 			     BT_MESH_MODEL_LIGHT_CTRL_SRV(&light_ctrl_srv)),
 		     BT_MESH_MODEL_NONE),
@@ -216,7 +225,7 @@ const struct bt_mesh_comp *model_handler_init(void)
 void model_handler_start(void)
 {
 	int err;
-
+	bt_mesh_time_srv_time_set(&sched_ctx.time_srv, k_uptime_get_32(), &time_status);
 	if (bt_mesh_is_provisioned()) {
 		return;
 	}
