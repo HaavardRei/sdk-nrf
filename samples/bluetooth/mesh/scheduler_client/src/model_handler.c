@@ -64,6 +64,7 @@ BT_MESH_HEALTH_PUB_DEFINE(health_pub, 0);
 static struct bt_mesh_scheduler_cli scheduler_cli;
 static struct bt_mesh_time_cli time_cli = BT_MESH_TIME_CLI_INIT(NULL);
 static struct bt_mesh_scene_cli scene_cli;
+static struct bt_mesh_light_ctrl_cli light_ctrl_cli = BT_MESH_LIGHT_CTRL_CLI_INIT(NULL);
 
 static struct bt_mesh_elem elements[] = {
 	BT_MESH_ELEM(1,
@@ -72,7 +73,8 @@ static struct bt_mesh_elem elements[] = {
 			BT_MESH_MODEL_HEALTH_SRV(&health_srv, &health_pub),
 			BT_MESH_MODEL_SCHEDULER_CLI(&scheduler_cli),
 			BT_MESH_MODEL_TIME_CLI(&time_cli),
-			BT_MESH_MODEL_SCENE_CLI(&scene_cli)),
+			BT_MESH_MODEL_SCENE_CLI(&scene_cli),
+			BT_MESH_MODEL_LIGHT_CTRL_CLI(&light_ctrl_cli)),
 		BT_MESH_MODEL_NONE),
 };
 
