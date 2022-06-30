@@ -26,21 +26,13 @@ struct scheduler_ctx {
 	struct bt_mesh_scheduler_srv scheduler_srv;
 };
 
-// TODO Fix
-static void time_update_cb(struct bt_mesh_time_srv *srv, struct bt_mesh_msg_ctx *ctx,
-			   enum bt_mesh_time_update_types type)
-{
-	/* bt_mesh_time_srv_time_set(srv, k_uptime_get_32(), &srv->data.sync.status); // TODO fix status in cb
-	printk("Updated TAI seconds: %llu\n", srv->data.sync.status.tai.sec); */
-}
-
 static struct scheduler_ctx sched_ctx = {
-	.time_srv = BT_MESH_TIME_SRV_INIT(&time_update_cb), // TODO verify parameters
+	.time_srv = BT_MESH_TIME_SRV_INIT(NULL), 
 	.scheduler_srv =
 		BT_MESH_SCHEDULER_SRV_INIT(NULL, &sched_ctx.time_srv),
 };
 
-// Used to initalize the time server
+// TODO Used to initalize the time server ----- remove?
 static struct bt_mesh_time_status time_status = {
 	.tai.sec = 10000,
 	.tai.subsec = 0,
@@ -224,7 +216,7 @@ const struct bt_mesh_comp *model_handler_init(void)
 void model_handler_start(void)
 {
 	int err;
-	bt_mesh_time_srv_time_set(&sched_ctx.time_srv, k_uptime_get_32(), &time_status);
+	bt_mesh_time_srv_time_set(&sched_ctx.time_srv, k_uptime_get_32(), &time_status); // TODO 
 	if (bt_mesh_is_provisioned()) {
 		return;
 	}
