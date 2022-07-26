@@ -80,7 +80,7 @@ static void start_new_light_trans(const struct bt_mesh_lightness_set *set,
 				  struct lightness_ctx *ctx)
 {
 	uint32_t step_cnt = abs(set->lvl - ctx->current_lvl) / PWM_SIZE_STEP;
-	uint32_t time = set->transition ? set->transition->time : 0;
+	uint32_t time =	set->transition ? set->transition->time : 0;
 	uint32_t delay = set->transition ? set->transition->delay : 0;
 
 	ctx->target_lvl = set->lvl;
@@ -154,25 +154,25 @@ static const struct bt_mesh_lightness_srv_handlers lightness_srv_handlers = {
 	.light_get = light_get,
 };
 
-static struct lightness_ctx my_ctx = {
+static struct lightness_ctx light_ctx = {
 	.lightness_srv = BT_MESH_LIGHTNESS_SRV_INIT(&lightness_srv_handlers),
-
 };
 
 static struct bt_mesh_light_ctrl_srv light_ctrl_srv =
-	BT_MESH_LIGHT_CTRL_SRV_INIT(&my_ctx.lightness_srv);
+	BT_MESH_LIGHT_CTRL_SRV_INIT(&light_ctx.lightness_srv);
+
+static struct bt_mesh_time_srv time_srv = BT_MESH_TIME_SRV_INIT(NULL);
+static struct bt_mesh_scheduler_srv scheduler_srv = BT_MESH_SCHEDULER_SRV_INIT(NULL, &time_srv);
 
 static struct bt_mesh_elem elements[] = {
 	BT_MESH_ELEM(1,
-		     BT_MESH_MODEL_LIST(
-			     BT_MESH_MODEL_CFG_SRV,
+			 BT_MESH_MODEL_LIST(BT_MESH_MODEL_CFG_SRV,
 			     BT_MESH_MODEL_HEALTH_SRV(&health_srv, &health_pub),
-			     BT_MESH_MODEL_LIGHTNESS_SRV(
-					 &my_ctx.lightness_srv)),
+					BT_MESH_MODEL_LIGHTNESS_SRV(&light_ctx.lightness_srv),
+					BT_MESH_MODEL_TIME_SRV(&time_srv),
+					BT_MESH_MODEL_SCHEDULER_SRV(&scheduler_srv)),
 		     BT_MESH_MODEL_NONE),
-	BT_MESH_ELEM(2,
-		     BT_MESH_MODEL_LIST(
-			     BT_MESH_MODEL_LIGHT_CTRL_SRV(&light_ctrl_srv)),
+	BT_MESH_ELEM(2, BT_MESH_MODEL_LIST(BT_MESH_MODEL_LIGHT_CTRL_SRV(&light_ctrl_srv)),
 		     BT_MESH_MODEL_NONE),
 };
 
@@ -185,7 +185,7 @@ static const struct bt_mesh_comp comp = {
 const struct bt_mesh_comp *model_handler_init(void)
 {
 	k_work_init_delayable(&attention_blink_work, attention_blink);
-	k_work_init_delayable(&my_ctx.per_work, periodic_led_work);
+	k_work_init_delayable(&light_ctx.per_work, periodic_led_work);
 
 	return &comp;
 }

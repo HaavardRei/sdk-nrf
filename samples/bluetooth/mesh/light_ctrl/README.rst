@@ -9,6 +9,10 @@ Bluetooth: Mesh light fixture
 
 The Bluetooth® mesh light fixture sample demonstrates how to set up a light control mesh server model application, and control a dimmable LED with Bluetooth mesh using the :ref:`bt_mesh_onoff_readme`.
 
+.. note::
+   This sample is self-contained, and can be tested on its own.
+   However, it is required when testing the :ref:`bluetooth_mesh_shell_client` sample.
+
 Requirements
 ************
 
@@ -35,6 +39,11 @@ In addition to generic on and off functions, it allows changing the light level 
 The sample instantiates the :ref:`bt_mesh_lightness_srv_readme` model and the :ref:`bt_mesh_light_ctrl_srv_readme` model.
 As both Light Lightness Server and the Light LC Server extend the Generic OnOff Server, the two models need to be instantiated on separate elements.
 For more information, see documentation on :ref:`bt_mesh_light_ctrl_srv_readme`.
+
+The sample also instantiates the :ref:`bt_mesh_scheduler_srv_readme` model and the :ref:`bt_mesh_scene_srv_readme`.
+The Scheduler Server relies on the :ref:`bt_mesh_time_srv_readme`, which is instantiated as well.
+These server models can be used to store the state of a node and to schedule periodic or non-periodic actions.
+For more information, see documentation on :ref:`bt_mesh_scheduler_srv_readme`.
 
 Devices are nodes with a provisionee role in a mesh network.
 Provisioning is performed using the `nRF Mesh mobile app`_.
@@ -76,6 +85,18 @@ The following table shows the mesh light fixture composition data for this sampl
    +-------------------------------+----------------------------+
    | Light Lightness Setup Server  |                            |
    +-------------------------------+----------------------------+
+   | Time Server                   |                            |
+   +-------------------------------+----------------------------+
+   | Time Setup Server             |                            |
+   +-------------------------------+----------------------------+
+   | Scene Server                  |                            |
+   +-------------------------------+----------------------------+
+   | Scene Setup Server            |                            |
+   +-------------------------------+----------------------------+
+   | Scheduler Server              |                            |
+   +-------------------------------+----------------------------+
+   | Scheduler Setup Server        |                            |
+   +-------------------------------+----------------------------+
 
 The models are used for the following purposes:
 
@@ -83,8 +104,10 @@ The models are used for the following purposes:
   The Config Server allows configurator devices to configure the node remotely.
   The Health Server provides ``attention`` callbacks that are used during provisioning to call your attention to the device.
   These callbacks trigger blinking of the LEDs.
-* The seven other models in the first element are the product of a single instance of the Light Lightness Server.
+* The seven consecutive models in the first element are the product of a single instance of the Light Lightness Server.
   The application implements callbacks for the Light Lightness Server to control the first LED on the device using the PWM (pulse width modulation) driver.
+* The six remaining models in the first element are the product of the Scheduler and Scene Server.
+  The functionality of these servers in this sample will be configured by the :ref:`bluetooth_mesh_shell_client` sample.
 * The three models in the second element are the product of a single instance of the Light Lightness Control (LC) Server.
   The Light LC Server controls the Light Lightness Server in the first element, deciding on parameters such as fade time, lighting levels for different states, and inactivity timing.
   In this sample, the Light LC Server is enabled by default at first boot.
@@ -171,7 +194,7 @@ Configure the Generic OnOff Server model on each element on the :guilabel:`Mesh 
 You should now see the following actions:
 
 1. The LED fades from 0% to 100% over a defined transition time following the message :guilabel:`Standby -> On`.
-#. The LED stays at 100% for three seconds :guilabel:`On`.
+#. The LED stays at 100% for ten seconds :guilabel:`On`.
 #. The LED fades from 100% to :kconfig:option:`CONFIG_BT_MESH_LIGHT_CTRL_SRV_LVL_PROLONG` over five seconds :guilabel:`On -> Prolong`.
 #. The LED stays at :kconfig:option:`CONFIG_BT_MESH_LIGHT_CTRL_SRV_LVL_PROLONG` for three seconds :guilabel:`Prolong`.
 #. The LED fades from :kconfig:option:`CONFIG_BT_MESH_LIGHT_CTRL_SRV_LVL_PROLONG` to 0% over five seconds :guilabel:`Prolong -> Standby`.
@@ -186,6 +209,11 @@ The default value of :kconfig:option:`CONFIG_BT_MESH_LIGHT_CTRL_SRV_LVL_PROLONG`
 .. note::
    The configuration of light levels, fade time, and timeouts can be changed by altering the configuration parameters in the :file:`prj.conf` file, and rebuilding the sample.
 
+To use the sample with the :guilabel:`Mesh Shell Client` sample, configure the Scheduler, Scene, Time and Light LC Server models of the :guilabel:`Mesh Light Fixture` node as follows:
+
+* Bind the model to :guilabel:`Application Key 1`.
+* Once the model is bound to the application key, and the :guilabel:`Mesh Shell Client` node has been configured according to the :ref:`testing guide <bluetooth_mesh_shell_client_testing>`, shell commands can be sent from the client node.
+
 Dependencies
 ************
 
@@ -193,6 +221,9 @@ This sample uses the following |NCS| libraries:
 
 * :ref:`bt_mesh_lightness_srv_readme`
 * :ref:`bt_mesh_light_ctrl_srv_readme`
+* :ref:`bt_mesh_time_srv_readme`
+* :ref:`bt_mesh_scene_srv_readme`
+* :ref:`bt_mesh_scheduler_srv_readme`
 * :ref:`bt_mesh_dk_prov`
 * :ref:`dk_buttons_and_leds_readme`
 
