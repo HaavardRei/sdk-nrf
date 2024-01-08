@@ -59,6 +59,16 @@ struct bt_mesh_light_ctl_srv;
 			 &_bt_mesh_light_ctl_setup_srv_cb)
 
 /**
+ *  Light CTL Temperature Range Metadata entry.
+ *
+ *  @param range Comma separated list of (16-bit) range_min and range_max.
+ */
+#define BT_MESH_LIGHT_CTL_TEMP_RANGE_METADATA(range)            \
+	BT_MESH_MODELS_METADATA_ENTRY(4,                                       \
+				      BT_MESH_LIGHT_CTL_TEMP_RANGE_METADATA_ID, \
+				      &range)
+
+/**
  * Light CTL Server instance. Should be initialized with
  * @ref BT_MESH_LIGHT_CTL_SRV_INIT.
  */
@@ -78,6 +88,10 @@ struct bt_mesh_light_ctl_srv {
 		BT_MESH_LIGHT_CTL_STATUS, BT_MESH_LIGHT_CTL_MSG_MAXLEN_STATUS)];
 	/** Transaction ID tracker for the set messages. */
 	struct bt_mesh_tid_ctx prev_transaction;
+#ifdef CONFIG_BT_MESH_LARGE_COMP_DATA_SRV
+	/** Pointer to array with metadata. */
+	struct bt_mesh_models_metadata_entry *metadata;
+#endif
 };
 
 /** @brief Publish the current CTL status.

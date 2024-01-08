@@ -59,6 +59,26 @@ struct tm;
 		struct bt_mesh_time_srv, _srv),                                \
 		&_bt_mesh_time_setup_srv_cb)
 
+/**
+ *  Clock Accuracy Metadata entry.
+ *
+ *  @param clock_accuracy 24-bit clock accuracy value.
+ */
+#define BT_MESH_CLOCK_ACCURACY_METADATA(clock_accuracy)                        \
+	BT_MESH_MODELS_METADATA_ENTRY(3,                                       \
+				      BT_MESH_CLOCK_ACCURACY_METADATA_ID,      \
+				      &clock_accuracy)
+
+/**
+ *  Timekeeping Reserve Metadata entry.
+ *
+ *  @param timekeeping_reserve 24-bit timekeeping reserve value.
+ */
+#define BT_MESH_TIMEKEEPING_RESERVE_METADATA(timekeeping_reserve)              \
+	BT_MESH_MODELS_METADATA_ENTRY(3,                                       \
+				      BT_MESH_TIMEKEEPING_RESERVE_METADATA_ID, \
+				      &timekeeping_reserve)
+
 /** Time srv update types */
 enum bt_mesh_time_update_types {
 	/** Status update */
@@ -107,6 +127,10 @@ struct bt_mesh_time_srv {
 	struct bt_mesh_time_srv_data data;
 	/** Delayable work to randomize status relaying. */
 	struct k_work_delayable status_delay;
+#ifdef CONFIG_BT_MESH_LARGE_COMP_DATA_SRV
+	/** Pointer to array with metadata. */
+	struct bt_mesh_models_metadata_entry *metadata;
+#endif
 
 	/** @brief Update callback.
 	 *

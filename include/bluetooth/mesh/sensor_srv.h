@@ -58,6 +58,16 @@ struct bt_mesh_sensor_srv;
 					      _srv),                           \
 			 &_bt_mesh_sensor_setup_srv_cb)
 
+/**
+ *  Sensor Properties Metadata entry.
+ *
+ *  @param sensor_properties List of 16-bit sensor property IDs.
+ */
+#define BT_MESH_SENSOR_PROP_METADATA(sensor_properties)                        \
+	BT_MESH_MODELS_METADATA_ENTRY(2*ARRAY_SIZE(sensor_properties),         \
+				      BT_MESH_SENSOR_PROP_METADATA_ID,         \
+				      &sensor_properties)
+
 /** Sensor server instance. */
 struct bt_mesh_sensor_srv {
 	/** Sensors owned by this server. */
@@ -92,6 +102,10 @@ struct bt_mesh_sensor_srv {
 			BT_MESH_SENSOR_MSG_MAXLEN_CADENCE_STATUS))];
 	/** Composition data model pointer. */
 	struct bt_mesh_model *model;
+#ifdef CONFIG_BT_MESH_LARGE_COMP_DATA_SRV
+	/** Pointer to array with metadata. */
+	struct bt_mesh_models_metadata_entry *metadata;
+#endif
 };
 
 #if !defined(CONFIG_BT_MESH_SENSOR_USE_LEGACY_SENSOR_VALUE) || defined(__DOXYGEN__)

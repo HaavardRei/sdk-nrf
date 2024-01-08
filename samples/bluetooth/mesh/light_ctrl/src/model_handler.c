@@ -101,8 +101,23 @@ static const struct bt_mesh_health_srv_cb health_srv_cb = {
 	.attn_off = attention_off,
 };
 
+#ifdef CONFIG_BT_MESH_LARGE_COMP_DATA_SRV
+static uint8_t health_tests[] = {
+	BT_MESH_HEALTH_TEST_INFO(0x1234, 6, 0x01, 0x02, 0x03, 0x04, 0x34, 0x15),
+	BT_MESH_HEALTH_TEST_INFO(0xabcd, 3, 0x01, 0x02, 0x03),
+};
+
+static struct bt_mesh_models_metadata_entry health_srv_metadata[] = {
+	BT_MESH_HEALTH_TEST_INFO_METADATA(health_tests),
+	BT_MESH_MODELS_METADATA_END,
+};
+#endif
+
 static struct bt_mesh_health_srv health_srv = {
 	.cb = &health_srv_cb,
+#ifdef CONFIG_BT_MESH_LARGE_COMP_DATA_SRV
+	.metadata = health_srv_metadata,
+#endif
 };
 
 BT_MESH_HEALTH_PUB_DEFINE(health_pub, 0);
@@ -186,6 +201,18 @@ static const struct bt_mesh_lightness_srv_handlers lightness_srv_handlers = {
 	.light_set = light_set,
 	.light_get = light_get,
 };
+
+#ifdef CONFIG_BT_MESH_LARGE_COMP_DATA_SRV
+static uint8_t health_tests[] = {
+	BT_MESH_HEALTH_TEST_INFO(0x1234, 6, 0x01, 0x02, 0x03, 0x04, 0x34, 0x15),
+	BT_MESH_HEALTH_TEST_INFO(0xabcd, 3, 0x01, 0x02, 0x03),
+};
+
+static struct bt_mesh_models_metadata_entry lightness_srv_metadata[] = {
+	BT_MESH_LIGHT_PURPOSE_METADATA(BT_MESH_LIGHT_PURPOSE_INDICATOR_LIGHT),
+	BT_MESH_MODELS_METADATA_END,
+};
+#endif
 
 static struct lightness_ctx my_ctx = {
 	.lightness_srv = BT_MESH_LIGHTNESS_SRV_INIT(&lightness_srv_handlers),

@@ -60,6 +60,26 @@ struct bt_mesh_light_hsl_srv;
 			 &_bt_mesh_light_hsl_setup_srv_cb)
 
 /**
+ *  Light HSL Hue Range Metadata entry.
+ *
+ *  @param range Comma separated list of (16-bit) range_min and range_max.
+ */
+#define BT_MESH_LIGHT_HSL_HUE_RANGE_METADATA(range)             \
+	BT_MESH_MODELS_METADATA_ENTRY(4,                                       \
+				      BT_MESH_LIGHT_HSL_HUE_RANGE_METADATA_ID, \
+				      &range)
+
+/**
+ *  Light HSL Saturation Range Metadata entry.
+ *
+ *  @param range Comma separated list of (16-bit) range_min and range_max.
+ */
+#define BT_MESH_LIGHT_HSL_SAT_RANGE_METADATA(range)             \
+	BT_MESH_MODELS_METADATA_ENTRY(4,                                       \
+				      BT_MESH_LIGHT_HSL_SAT_RANGE_METADATA_ID, \
+				      &range)
+
+/**
  * Light HSL Server instance.
  */
 struct bt_mesh_light_hsl_srv {
@@ -87,6 +107,10 @@ struct bt_mesh_light_hsl_srv {
 	bool pub_pending;
 	/** Transaction ID tracker for the set messages. */
 	struct bt_mesh_tid_ctx prev_transaction;
+#ifdef CONFIG_BT_MESH_LARGE_COMP_DATA_SRV
+	/** Pointer to array with metadata. */
+	struct bt_mesh_models_metadata_entry *metadata;
+#endif
 };
 
 /** @brief Publish the current HSL status.

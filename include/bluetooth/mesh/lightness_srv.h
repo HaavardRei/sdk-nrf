@@ -65,6 +65,26 @@ struct bt_mesh_lightness_srv;
 						 _srv),                        \
 			 &_bt_mesh_lightness_setup_srv_cb)
 
+/**
+ *  Define the Light Purpose Metadata entry.
+ *
+ *  @param light_purpose 16-bit light purpose value.
+ */
+#define BT_MESH_LIGHT_PURPOSE_METADATA(light_purpose)                          \
+	BT_MESH_MODELS_METADATA_ENTRY(2,                                       \
+				      BT_MESH_LIGHT_PURPOSE_METADATA_ID,       \
+				      &light_purpose)
+
+/**
+ *  Light Lightness Range Metadata entry.
+ *
+ *  @param range Comma separated list of (16-bit) range_min and range_max.
+ */
+#define BT_MESH_LIGHT_LIGHTNESS_RANGE_METADATA(range)           \
+	BT_MESH_MODELS_METADATA_ENTRY(4,                                       \
+				      BT_MESH_LIGHT_LIGHTNESS_RANGE_METADATA_ID, \
+				      &range)
+
 /** Collection of handler callbacks for the Light Lightness Server. */
 struct bt_mesh_lightness_srv_handlers {
 	/** @brief Set the Light state.
@@ -195,6 +215,11 @@ struct bt_mesh_lightness_srv {
 #if defined(CONFIG_BT_MESH_LIGHT_CTRL_SRV)
 	/** Acting controller, if enabled. */
 	struct bt_mesh_light_ctrl_srv *ctrl;
+#endif
+
+#ifdef CONFIG_BT_MESH_LARGE_COMP_DATA_SRV
+	/** Pointer to array with metadata. */
+	struct bt_mesh_models_metadata_entry *metadata;
 #endif
 };
 
