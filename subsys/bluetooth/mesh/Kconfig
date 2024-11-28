@@ -111,6 +111,10 @@ config BT_MESH_PROXY_FILTER_SIZE
 
 endif
 
+config BT_MESH_USES_MBEDTLS_PSA
+	bool
+	select NRF_SECURITY
+
 config BT_MESH_USES_TFM_PSA
 	bool
 	select PSA_WANT_GENERATE_RANDOM
